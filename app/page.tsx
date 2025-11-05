@@ -2,7 +2,7 @@ const Home = () => {
     console.log("what type of a component am i")
 
     return (
-        <div>nextjs </div>
+        <h1>nextjs </h1>
     )
 }
 export default Home
