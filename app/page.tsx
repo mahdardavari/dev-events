@@ -1,8 +1,13 @@
 import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
-import events from "@/lib/constants";
+import {cacheLife} from "next/cache";
+import {getAllEvents} from "@/lib/actions/event.actions";
 
-const Home = () => {
+const Home = async () => {
+    'use cache'
+    cacheLife('minutes')
+    const events = await getAllEvents();
+
     return (
         <section>
             <h1 className="text-center">The hub for Every Dev <br/>Event You Can't Miss</h1>
