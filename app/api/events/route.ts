@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from "next/server";
 import connectDB from "@/lib/mongodb";
 import {v2 as cloudinary} from 'cloudinary'
 import Event from "@/database/event.model";
-
+import {getAllEvents} from "@/lib/actions/event.actions";
 
 export async function POST(req: NextRequest) {
     try {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
             tags: tags,
             agenda: agenda,
         });
-      
+
 
         return NextResponse.json({message: 'Event created successfully', event: createdEvent}, {status: 201});
     } catch (e) {
@@ -56,14 +56,12 @@ export async function POST(req: NextRequest) {
     }
 }
 
+// Centralized DB logic for fetching events
 export async function GET() {
     try {
-        await connectDB();
-
-        const events = await Event.find().sort({createdAt: -1});
-
-        return NextResponse.json({message: 'Events fetched successfully', events}, {status: 200});
+        const events = await getAllEvents();
+        return NextResponse.json({message: "Events fetched successfully", events}, {status: 200});
     } catch (e) {
-        NextResponse.json({message: 'Event fetching failed', error: e}, {status: 500});
+        return NextResponse.json({message: "Event fetching failed", error: e}, {status: 500});
     }
 }
