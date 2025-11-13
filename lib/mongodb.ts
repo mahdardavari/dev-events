@@ -32,10 +32,12 @@ if (!global.mongoose) {
 }
 
 /**
- * Establishes a connection to MongoDB using Mongoose.
- * Caches the connection to reuse across function calls.
+ * Connects to MongoDB via Mongoose and reuses a cached connection across calls.
  *
- * @returns {Promise<typeof mongoose>} The Mongoose instance
+ * If a connection attempt is already in progress, awaits the existing promise.
+ * On connection failure, clears the cached pending promise and rethrows the error.
+ *
+ * @returns The connected Mongoose instance
  */
 async function connectDB(): Promise<typeof mongoose> {
     // Return existing connection if available
