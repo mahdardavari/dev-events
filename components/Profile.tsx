@@ -1,18 +1,27 @@
 import {auth} from "@/lib/auth";
 import {headers} from "next/headers";
 import Link from "next/link";
-
-// export const dynamic = "force-dynamic"; // required for session checks
+import {signOutAction} from "@/lib/actions/auth.actions";
+import {LogOut} from 'lucide-react';
 
 const Profile = async () => {
     const session = await auth.api.getSession({headers: await headers()});
 
     if (session?.user) {
-        return <p>Welcome, {session.user.name} 👋</p>;
+        return (
+            <div>
+                <p>Welcome, {session.user.name} 👋</p>
+                <form action={signOutAction}>
+                    <button>
+                        <LogOut className='cursor-pointer m-2' size={20}/>
+                    </button>
+                </form>
+            </div>
+        )
     }
 
     return (
-        <div className="flex gap-4  mt-4">
+        <div className="flex gap-4 ">
             <Link href="/sign-up-email" className="text-white hover:underline">
                 Sign Up
             </Link>
