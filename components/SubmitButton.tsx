@@ -35,6 +35,17 @@ interface SubmitButtonProps
     children: React.ReactNode;
 }
 
+/**
+ * Render a submit button that reflects the current form pending state and supports style variants.
+ *
+ * When the form is pending the button is disabled and displays a spinner with "Loading..."; otherwise it renders `children`.
+ *
+ * @param variant - Visual variant of the button (e.g., "primary", "secondary", "tertiary", "danger")
+ * @param size - Size variant of the button (e.g., "sm", "md", "lg")
+ * @param className - Additional class names to merge with computed variant classes
+ * @param children - Content to display inside the button when the form is not pending
+ * @returns A button element configured as a form submit control that reflects form status and selected variants
+ */
 export function SubmitButton({children, variant, size, className, ...props}: SubmitButtonProps) {
     const {pending} = useFormStatus();
 
