@@ -1,5 +1,6 @@
 import React from 'react'
 import {signInEmailAction} from "@/lib/actions/auth.actions";
+import {SubmitButton} from "@/components/SubmitButton";
 
 const SignInPage = () => {
     return (
@@ -23,12 +24,9 @@ const SignInPage = () => {
                     required
                     className="w-full border p-2 rounded-md"
                 />
-                <button
-                    type="submit"
-                    className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
-                >
+                <SubmitButton variant="tertiary" size="lg" className="w-full">
                     Sign in
-                </button>
+                </SubmitButton>
             </form>
         </main>
     )
