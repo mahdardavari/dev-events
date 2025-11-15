@@ -9,7 +9,7 @@ const SignInPage = () => {
                 action={signInEmailAction}
                 className="p-6 rounded-2xl shadow-lg space-y-4 w-80"
             >
-                <h1 className="text-2xl font-bold text-center">Login</h1>
+                <h1 className="text-2xl font-bold text-center">Sign in</h1>
                 <input
                     type="email"
                     name="email"

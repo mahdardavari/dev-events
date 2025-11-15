@@ -9,7 +9,7 @@ const SignUpEmailPage = () => {
                 action={signUpEmailAction}
                 className="p-6 rounded-2xl shadow-lg space-y-4 w-80"
             >
-                <h1 className="text-2xl font-bold text-center">Register</h1>
+                <h1 className="text-2xl font-bold text-center">Sign up with email</h1>
                 <input
                     type="text"
                     name="name"

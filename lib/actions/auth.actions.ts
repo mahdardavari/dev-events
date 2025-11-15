@@ -11,6 +11,7 @@ export async function signUpEmailAction(formData: FormData) {
 
     const result = await auth.api.signUpEmail({body: {name, email, password}});
 
+
     redirect("/");
 }
 

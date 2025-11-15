@@ -21,7 +21,7 @@ const Profile = async () => {
     }
 
     return (
-        <div className="flex gap-4 ">
+        <div className="flex gap-4 pb-4 sm:pb-0 ">
             <Link href="/sign-up-email" className="text-white hover:underline">
                 Sign Up
             </Link>
