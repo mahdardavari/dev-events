@@ -1,10 +1,10 @@
-import ExploreBtn from "@/components/ExploreBtn";
 import Profile from "@/components/Profile";
 import {Suspense} from "react";
-import EventsList from "@/components/EventsList";
+import {SearchSection} from "@/components/SearchSection";
 
-const Home = () => {
-
+export default function Home({searchParams}: {
+    searchParams: Promise<{ q?: string }>;
+}) {
     return (
         <section>
             <Suspense fallback={<div>Loading profile...</div>}>
@@ -12,12 +12,12 @@ const Home = () => {
             </Suspense>
             <h1 className="text-center">The hub for Every Dev <br/>Event You Can't Miss</h1>
             <p className="text-center mt-5">Hackathon, Meetups, and Conference, All in One Place</p>
-            <ExploreBtn/>
 
-            <Suspense fallback={<div>Loading events...</div>}>
-                <EventsList/>
+            {/* Wrap the part that awaits searchParams in Suspense */}
+            <Suspense fallback={<div>Loading search...</div>}>
+                <SearchSection searchParams={searchParams}/>
             </Suspense>
         </section>
     )
 }
-export default Home
+
