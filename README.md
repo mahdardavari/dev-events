@@ -2,7 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [
 `create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 A modern, full-stack platform for discovering and booking developer events including hackathons, meetups, and
-conferences. Built with Next.js 16x, MongoDB, and TypeScript.
+conferences. Built with Next.js 16x, MongoDB (integration for data persistence) ,Image upload to Cloudinary storage and
+TypeScript.
 
 ## Getting Started
 
@@ -38,6 +39,12 @@ Server Actions - Secure data mutations
 
 - [Vercel](https://vercel.com/) - Platform deployment
 - [Cloudinary](https://cloudinary.com/) - Image optimization and storage.
+
+## Features
+
+Authentication : Sign In / Sign Up / Logout
+
+Events Management : Get All Events / Get Similar Events By Slug / Event Booking / Create Event
 
 
 
