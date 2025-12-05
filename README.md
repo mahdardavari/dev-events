@@ -34,9 +34,10 @@ Next.js API Routes - Serverless API endpoints
 
 Server Actions - Secure data mutations
 
-## ## Deploy on Vercel
+## Deploy on Vercel
 
 - [Vercel](https://vercel.com/) - Platform deployment
 - [Cloudinary](https://cloudinary.com/) - Image optimization and storage.
+
 
 

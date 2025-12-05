@@ -33,7 +33,7 @@ export default function SearchBar({initialValue = ""}: { initialValue?: string }
             <input
                 type="text"
                 placeholder="Search events…"
-                className="border p-3 rounded-xl mt-7 mx-auto block w-96"
+                className="border p-3 rounded-xl mt-7 mx-auto block w-full md:w-96"
                 value={value}
                 onChange={handleChange}
             />

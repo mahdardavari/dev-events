@@ -120,7 +120,7 @@
     }
 
     h1 {
-        @apply text-gradient text-6xl font-semibold max-sm:text-4xl;
+        @apply text-gradient text-6xl font-semibold max-sm:text-xl;
     }
 
     h3 {
