@@ -1,12 +1,12 @@
 "use client"
 
 import React, {useActionState} from 'react'
-import {signInEmailAction} from "@/lib/actions/auth.actions";
+import {forgotPasswordAction} from "@/lib/actions/auth.actions";
 import {SubmitButton} from "@/components/SubmitButton";
 import Link from "next/link";
 
-const SignInPage = () => {
-    const [state, formAction] = useActionState(signInEmailAction, null);
+const ForgotPasswordPage = () => {
+    const [state, formAction] = useActionState(forgotPasswordAction, null);
 
     return (
         <main className="min-h-screen flex items-center justify-center">
@@ -14,12 +14,20 @@ const SignInPage = () => {
                 action={formAction}
                 className="p-6 rounded-2xl shadow-lg space-y-4 w-80"
             >
-                <h1 className="text-2xl font-bold text-center">Sign in</h1>
+                <h1 className="text-2xl font-bold text-center">Forgot password</h1>
                 {state?.error && (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm">
                         {state.error}
                     </div>
                 )}
+                {state?.success && (
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
+                        Check your email for a password reset link.
+                    </div>
+                )}
+                <p className="text-sm text-gray-600 text-center">
+                    Enter your email and we&apos;ll send you a link to reset your password.
+                </p>
                 <input
                     type="email"
                     name="email"
@@ -27,29 +35,17 @@ const SignInPage = () => {
                     required
                     className="w-full border p-2 rounded-md"
                 />
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    required
-                    className="w-full border p-2 rounded-md"
-                />
-                <div className="text-right">
-                    <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-                        Forgot password?
-                    </Link>
-                </div>
                 <SubmitButton variant="tertiary" size="lg" className="w-full">
-                    Sign in
+                    Send reset link
                 </SubmitButton>
                 <p className="text-center text-sm text-gray-600">
-                    Don&apos;t have an account?{" "}
-                    <Link href="/sign-up-email" className="text-blue-600 hover:underline">
-                        Sign up
+                    Remember your password?{" "}
+                    <Link href="/sign-in" className="text-blue-600 hover:underline">
+                        Sign in
                     </Link>
                 </p>
             </form>
         </main>
     )
 }
-export default SignInPage
+export default ForgotPasswordPage
