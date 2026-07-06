@@ -21,7 +21,8 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         sendResetPassword: async ({ user, url, token }, request) => {
-            const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${url}`;
+            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+            const resetUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
             await transporter.sendMail({
                 from: `"DevEvent" <${process.env.GMAIL_USER}>`,
                 to: user.email,
