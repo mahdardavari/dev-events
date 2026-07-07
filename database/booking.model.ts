@@ -54,7 +54,7 @@ BookingSchema.pre('save', async function (next) {
             if (!eventExists) {
                 return next(new Error(`Event with ID ${this.eventId} does not exist`));
             }
-        } catch (error) {
+        } catch {
             return next(new Error('Failed to validate events reference'));
         }
     }

@@ -22,7 +22,7 @@ const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
             <h3>Featured Events</h3>
             {searchQuery && (
                 <p className="text-sm text-gray-600">
-                    Showing results for: <span className="font-semibold">"{searchQuery}"</span>
+                    Showing results for: <span className="font-semibold">&quot;{searchQuery}&quot;</span>
                 </p>
             )}
             <ul className="events">

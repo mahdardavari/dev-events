@@ -154,7 +154,7 @@ EventSchema.pre('save', function (next) {
             }
             // Store as ISO date string (YYYY-MM-DD)
             this.date = parsedDate.toISOString().split('T')[0];
-        } catch (error) {
+        } catch {
             return next(new Error('Invalid date format'));
         }
     }
