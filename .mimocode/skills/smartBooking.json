@@ -1,0 +1,30 @@
+{
+    "name": "smartBooking",
+    "description": "Event booking with advanced error handling and validation",
+    "inputs": {
+        "eventSlug": {
+            "type": "string",
+            "required": true,
+            "description": "Unique event identifier"
+        },
+        "email": {
+            "type": "string",
+            "required": true,
+            "description": "User email for booking"
+        },
+        "userName": {
+            "type": "string",
+            "required": false,
+            "description": "User name (optional)"
+        }
+    },
+    "output": {
+        "type": "object",
+        "properties": {
+            "success": "boolean",
+            "message": "string",
+            "bookingId": "string"
+        }
+    },
+    "handler": "lib/actions/event.actions/smartBooking.ts"
+}
