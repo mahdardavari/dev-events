@@ -1,21 +1,13 @@
 import EventCard from "@/components/EventCard";
-import {getAllEvents} from "@/lib/actions/event.actions";
+import {getFilteredEvents} from "@/lib/actions/event.actions";
 import {cacheLife, cacheTag} from "next/cache";
 
 const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
-    'use cache: private'
-    cacheLife({stale: 60}) // Minimum 30 seconds required for runtime prefetch
-    cacheTag("events")
-    
-    const events = await getAllEvents();
+    'use cache: private';
+    cacheLife({stale: 60});
+    cacheTag("events");
 
-    const filteredEvents = searchQuery
-        ? events.filter(event =>
-            event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.location?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : events;
+    const events = await getFilteredEvents(searchQuery);
 
     return (
         <div className="mt-20 space-y-7">
@@ -26,9 +18,9 @@ const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
                 </p>
             )}
             <ul className="events">
-                {filteredEvents && filteredEvents.length > 0 ? (
-                    filteredEvents.map((event) => (
-                        <li key={event.title} className="list-none">
+                {events.length > 0 ? (
+                    events.map((event) => (
+                        <li key={event._id.toString()} className="list-none">
                             <EventCard {...event} />
                         </li>
                     ))
