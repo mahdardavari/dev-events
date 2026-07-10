@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useDeferredValue, useTransition, useEffect, ChangeEvent} from "react";
+import {useState, useDeferredValue, useTransition, useEffect, useRef, ChangeEvent} from "react";
 import {useRouter} from "next/navigation";
 
 export default function SearchBar({initialValue = ""}: { initialValue?: string }) {
@@ -8,9 +8,14 @@ export default function SearchBar({initialValue = ""}: { initialValue?: string }
     const deferredValue = useDeferredValue(value);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+    const isInitialMount = useRef(true);
 
-    // Sync deferred value to URL when it changes
     useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
         startTransition(() => {
             const params = new URLSearchParams(window.location.search);
             if (deferredValue.trim()) {

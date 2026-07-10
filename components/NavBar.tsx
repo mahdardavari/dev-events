@@ -1,24 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
 
+const navLinks = [
+    {href: "/", label: "Home"},
+    {href: "/", label: "Events"},
+    {href: "/", label: "Create Event"},
+];
+
 const Navbar = () => {
     return (
         <header>
             <nav>
-                <Link href='/' className="logo">
+                <Link href="/" className="logo">
                     <Image src="/icons/logo.png" alt="logo" width={24} height={24}/>
-
                     <p>DevEvent</p>
                 </Link>
 
                 <ul>
-                    <Link href="/">Home</Link>
-                    <Link href="/">Events</Link>
-                    <Link href="/">Create Event</Link>
+                    {navLinks.map((link) => (
+                        <Link key={link.label} href={link.href}>
+                            {link.label}
+                        </Link>
+                    ))}
                 </ul>
             </nav>
         </header>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;

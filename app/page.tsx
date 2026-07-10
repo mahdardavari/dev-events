@@ -7,10 +7,8 @@ export default function Home({searchParams}: {
 }) {
     return (
         <section>
-            <Suspense fallback={<div>Loading profile...</div>}>
-                <Profile/>
-            </Suspense>
-            <h1 className="text-center">The hub for Every Dev <br/>Event You Can't Miss</h1>
+            <Profile/>
+            <h1 className="text-center">The hub for Every Dev <br/>Event You Can&apos;t Miss</h1>
             <p className="text-center mt-5">Hackathon, Meetups, and Conference, All in One Place</p>
 
             {/* Wrap the part that awaits searchParams in Suspense */}
