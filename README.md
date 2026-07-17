@@ -1,50 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [
-`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Event Booking Platform
 
-A modern, full-stack platform for discovering and booking developer events including hackathons, meetups, and
-conferences. Built with Next.js 16x, MongoDB (integration for data persistence) ,Image upload to Cloudinary storage and
-TypeScript.
+A modern, full-stack platform for discovering and booking developer events — hackathons, meetups, and conferences.
 
-## Getting Started
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Backend
-
-MongoDB - Database with Mongoose ODM
-
-Next.js API Routes - Serverless API endpoints
-
-Server Actions - Secure data mutations
-
-## Deploy on Vercel
-
-- [Vercel](https://vercel.com/) - Platform deployment
-- [Cloudinary](https://cloudinary.com/) - Image optimization and storage.
+Built with **Next.js**, **MongoDB**, **TypeScript**, and **Cloudinary**.
 
 ## Features
 
-Authentication : Sign In / Sign Up / Logout
+- **Authentication** — Sign up, sign in, logout
+- **Browse Events** — List all events, view similar events by category
+- **Event Booking** — Book your spot at any event
+- **Create Event** — Signed-in users can create new events
+- **Edit Event** — Event creators can edit their own events via the Edit button on the event page
+- **Cloudinary Images** — Image upload and optimization
 
-Events Management : Get All Events / Get Similar Events By Slug / Event Booking / Create Event
+## Getting Started
 
+```bash
+npm install
+npm run dev
+```
 
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Tech Stack
+
+- **Framework:** Next.js
+- **Database:** MongoDB with Mongoose ODM
+- **Auth:** Better Auth
+- **Storage:** Cloudinary (images)
+- **Language:** TypeScript
+
+## Deployment
+
+- [Vercel](https://vercel.com/) — Hosting
+- [Cloudinary](https://cloudinary.com/) — Image storage
 

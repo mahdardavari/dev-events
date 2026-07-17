@@ -1,14 +1,17 @@
+import {Suspense} from "react";
 import {notFound} from "next/navigation";
-import {IEventLean} from "@/database";
+import Link from "next/link";
 import {getSimilarEventsBySlug, getEventBySlug, getBookingCountByEventId} from "@/lib/actions/event.actions";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import EventCard from "@/components/EventCard";
-import {cacheLife} from "next/cache";
+import {auth} from "@/lib/auth";
+import {headers} from "next/headers";
+import {Pencil} from "lucide-react";
 
 const EventDetailItem = ({icon, alt, label}: { icon: string; alt: string; label: string }) => (
     <div className="flex-row-gap-2 items-center">
-        <Image src={icon} alt={alt} width={17} height={17}/>
+        <Image src={icon} alt={alt} width={17} height={17} loading="lazy"/>
         <p>{label}</p>
     </div>
 );
@@ -41,7 +44,7 @@ const SimilarEvents = async ({slug}: { slug: string }) => {
         <div className="flex w-full flex-col gap-4 pt-20">
             <h2>Similar Events</h2>
             <div className="events">
-                {similarEvents.map((similarEvent: IEventLean) => (
+                {similarEvents.map((similarEvent) => (
                     <EventCard key={similarEvent._id} {...similarEvent} />
                 ))}
             </div>
@@ -49,27 +52,105 @@ const SimilarEvents = async ({slug}: { slug: string }) => {
     );
 };
 
-const EventDetails = async ({slug}: { slug: string }) => {
-    'use cache';
-    cacheLife('hours');
+const BookingCount = async ({eventId}: { eventId: string }) => {
+    const bookings = await getBookingCountByEventId(eventId);
+    return bookings > 0 ? (
+        <p className="text-sm">
+            Join {bookings} people who have already booked their spot!
+        </p>
+    ) : (
+        <p className="text-sm">Be the first to book your spot!</p>
+    );
+};
 
+const BookingSection = async ({eventId, slug}: { eventId: string; slug: string }) => {
+    let isLoggedIn = false;
+    try {
+        const session = await auth.api.getSession({headers: await headers()});
+        isLoggedIn = !!session?.user;
+    } catch {
+        // Not logged in
+    }
+
+    return (
+        <aside className="booking">
+            <div className="signup-card">
+                <h2>Book Your Spot</h2>
+                <Suspense fallback={<p className="text-sm text-gray-500">Loading...</p>}>
+                    <BookingCount eventId={eventId}/>
+                </Suspense>
+                {isLoggedIn ? (
+                    <BookEvent eventId={eventId} slug={slug}/>
+                ) : (
+                    <div className="flex flex-col gap-3 mt-4">
+                        <p className="text-sm text-gray-400">
+                            Sign in to book your spot at this event.
+                        </p>
+                        <Link
+                            href="/sign-in"
+                            className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                            Sign In
+                        </Link>
+                        <p className="text-xs text-gray-500 text-center">
+                            Don&apos;t have an account?{" "}
+                            <Link href="/sign-up-email" className="text-green-500 hover:underline">
+                                Sign up
+                            </Link>
+                        </p>
+                    </div>
+                )}
+            </div>
+        </aside>
+    );
+};
+
+const OwnerCheck = async ({createdBy, slug}: { createdBy: string; slug: string }) => {
+    let isOwner = false;
+    try {
+        const session = await auth.api.getSession({headers: await headers()});
+        if (session?.user?.id && createdBy === session.user.id) {
+            isOwner = true;
+        }
+    } catch {
+        // Not logged in
+    }
+
+    if (!isOwner) return null;
+
+    return (
+        <Link
+            href={`/edit-event/${slug}`}
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+        >
+            <Pencil size={14}/>
+            Edit
+        </Link>
+    );
+};
+
+const EventDetails = async ({slug}: { slug: string }) => {
     const event = await getEventBySlug(slug);
 
     if (!event || !event.description) return notFound();
 
-    const {description, image, overview, date, time, location, mode, agenda, audience, tags, organizer, _id} = event;
-    const bookings = await getBookingCountByEventId(_id);
+    const {description, image, overview, date, time, location, mode, agenda, audience, tags, organizer, _id, createdBy} = event;
 
     return (
         <section id="event">
             <div className="header">
-                <h1>Event Description</h1>
+                <div className="flex items-center gap-4">
+                    <h1>Event Description</h1>
+                    <Suspense fallback={null}>
+                        <OwnerCheck createdBy={createdBy} slug={slug}/>
+                    </Suspense>
+                </div>
                 <p>{description}</p>
             </div>
 
             <div className="details">
                 <div className="content">
-                    <Image src={image} alt="Event Banner" width={800} height={800} className="banner"/>
+                    <Image src={image} alt="Event Banner" width={800} height={800} className="banner" priority/>
 
                     <section className="flex-col-gap-2">
                         <h2>Overview</h2>
@@ -95,23 +176,14 @@ const EventDetails = async ({slug}: { slug: string }) => {
                     <EventTags tags={tags}/>
                 </div>
 
-                <aside className="booking">
-                    <div className="signup-card">
-                        <h2>Book Your Spot</h2>
-                        {bookings > 0 ? (
-                            <p className="text-sm">
-                                Join {bookings} people who have already booked their spot!
-                            </p>
-                        ) : (
-                            <p className="text-sm">Be the first to book your spot!</p>
-                        )}
-
-                        <BookEvent eventId={_id} slug={slug}/>
-                    </div>
-                </aside>
+                <Suspense fallback={<aside className="booking"><div className="signup-card"><p className="text-sm text-gray-500">Loading...</p></div></aside>}>
+                    <BookingSection eventId={_id} slug={slug}/>
+                </Suspense>
             </div>
 
-            <SimilarEvents slug={slug}/>
+            <Suspense fallback={null}>
+                <SimilarEvents slug={slug}/>
+            </Suspense>
         </section>
     );
 };

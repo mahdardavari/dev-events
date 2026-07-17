@@ -4,7 +4,7 @@ import clientPromise from "./mongodb-client";
 import {nextCookies} from "better-auth/next-js";
 import nodemailer from "nodemailer";
 
-const client = await clientPromise;     //resolve the MongoClient
+const client = await clientPromise;
 const db = client.db();
 
 const transporter = nodemailer.createTransport({
@@ -20,7 +20,7 @@ export const auth = betterAuth({
     secret: process.env.BETTER_AUTH_SECRET!,
     emailAndPassword: {
         enabled: true,
-        sendResetPassword: async ({ user, url }) => {
+        sendResetPassword: async ({user, url}) => {
             const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
             const resetUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
             await transporter.sendMail({
@@ -55,9 +55,9 @@ export const auth = betterAuth({
         },
     },
     session: {
-        expiresIn: 60 * 60 * 24 * 7, // 7 days
-        updateAge: 60 * 60 * 24 // 1 day (every 1 day the session expiration is updated)
+        expiresIn: 60 * 60 * 24 * 7,
+        updateAge: 60 * 60 * 24,
     },
-    plugins: [nextCookies()] // make sure this is the last plugin in the array
+    plugins: [nextCookies()],
 });
 
