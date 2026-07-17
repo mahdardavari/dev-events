@@ -3,8 +3,8 @@ import Image from "next/image";
 
 const navLinks = [
     {href: "/", label: "Home"},
-    {href: "/", label: "Events"},
-    {href: "/", label: "Create Event"},
+    {href: "/#events", label: "Events"},
+    {href: "/create-event", label: "Create Event"},
 ];
 
 const Navbar = () => {

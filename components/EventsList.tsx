@@ -5,9 +5,9 @@ import {cacheLife, cacheTag} from "next/cache";
 const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
     'use cache: private';
     cacheLife({stale: 60});
-    cacheTag("events");
+    cacheTag(`events-${searchQuery}`);
 
-    const events = await getFilteredEvents(searchQuery);
+    const {events, total} = await getFilteredEvents(searchQuery);
 
     return (
         <div className="mt-20 space-y-7">
@@ -15,13 +15,14 @@ const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
             {searchQuery && (
                 <p className="text-sm text-gray-600">
                     Showing results for: <span className="font-semibold">&quot;{searchQuery}&quot;</span>
+                    <span className="ml-2">({total} found)</span>
                 </p>
             )}
             <ul className="events">
                 {events.length > 0 ? (
-                    events.map((event) => (
+                    events.map((event, index) => (
                         <li key={event._id.toString()} className="list-none">
-                            <EventCard {...event} />
+                            <EventCard {...event} priority={index < 3} />
                         </li>
                     ))
                 ) : (
