@@ -4,6 +4,7 @@ import {auth} from '@/lib/auth';
 import {headers} from 'next/headers';
 import {EventForm} from '@/components/forms/EventForm';
 import {createEvent} from '@/lib/actions/event.actions';
+import {Suspense} from 'react';
 
 export const metadata: Metadata = {
     title: 'Create Event | DevEvent',
@@ -61,7 +62,7 @@ async function handleCreateEvent(formData: FormData) {
     return {success: false, error: result.error};
 }
 
-const CreateEventPage = async () => {
+async function CreateEventContent() {
     const session = await auth.api.getSession({headers: await headers()});
 
     if (!session?.user) {
@@ -78,6 +79,14 @@ const CreateEventPage = async () => {
                 <EventForm mode="create" onSubmit={handleCreateEvent}/>
             </div>
         </main>
+    );
+}
+
+const CreateEventPage = async () => {
+    return (
+        <Suspense>
+            <CreateEventContent />
+        </Suspense>
     );
 };
 

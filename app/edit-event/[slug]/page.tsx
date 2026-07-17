@@ -5,6 +5,7 @@ import {headers} from 'next/headers';
 import {EventForm} from '@/components/forms/EventForm';
 import {getEventForEdit, updateEvent} from '@/lib/actions/event.actions';
 import {v2 as cloudinary} from 'cloudinary';
+import {Suspense} from 'react';
 
 export const metadata: Metadata = {
     title: 'Edit Event | DevEvent',
@@ -64,9 +65,8 @@ async function handleUpdateEvent(slug: string, formData: FormData) {
     return {success: false, error: result.error};
 }
 
-const EditEventPage = async ({params}: { params: Promise<{ slug: string }> }) => {
+async function EditEventContent({params}: { params: Promise<{ slug: string }> }) {
     const {slug} = await params;
-
     const session = await auth.api.getSession({headers: await headers()});
     if (!session?.user) {
         redirect('/sign-in');
@@ -108,6 +108,14 @@ const EditEventPage = async ({params}: { params: Promise<{ slug: string }> }) =>
                 />
             </div>
         </main>
+    );
+}
+
+const EditEventPage = ({params}: { params: Promise<{ slug: string }> }) => {
+    return (
+        <Suspense>
+            <EditEventContent params={params} />
+        </Suspense>
     );
 };
 
