@@ -13,7 +13,8 @@ interface EventCardProps {
 
 const EventCard = ({title, image, slug, location, date, time, priority = false}: EventCardProps) => {
     return (
-        <Link href={`/events/${slug}`} id="event-card">
+        <Link href={`/events/${slug}`} id="event-card"
+            className="transition-transform duration-[160ms] ease-out hover:-translate-y-0.5 active:translate-y-0">
             <Image
                 src={image}
                 alt={title}

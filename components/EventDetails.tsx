@@ -88,7 +88,7 @@ const BookingSection = async ({eventId, slug}: { eventId: string; slug: string }
                         </p>
                         <Link
                             href="/sign-in"
-                            className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                            className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium active:scale-[0.97] transition-transform duration-[160ms] ease-out"
                         >
                             Sign In
                         </Link>
@@ -121,7 +121,7 @@ const OwnerCheck = async ({createdBy, slug}: { createdBy: string; slug: string }
     return (
         <Link
             href={`/edit-event/${slug}`}
-            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors active:scale-[0.97] transition-transform duration-[160ms] ease-out"
         >
             <Pencil size={14}/>
             Edit

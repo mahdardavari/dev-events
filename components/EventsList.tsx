@@ -21,7 +21,8 @@ const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
             <ul className="events">
                 {events.length > 0 ? (
                     events.map((event, index) => (
-                        <li key={event._id.toString()} className="list-none">
+                        <li key={event._id.toString()} className="list-none animate-[fadeInUp_400ms_ease-out_backwards]"
+                            style={{animationDelay: `${Math.min(index, 7) * 60}ms`}}>
                             <EventCard {...event} priority={index < 3} />
                         </li>
                     ))

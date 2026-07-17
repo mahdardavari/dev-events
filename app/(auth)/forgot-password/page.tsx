@@ -16,12 +16,12 @@ const ForgotPasswordPage = () => {
             >
                 <h1 className="text-2xl font-bold text-center">Forgot password</h1>
                 {state?.error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm">
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm animate-[fadeInUp_300ms_ease-out]">
                         {state.error}
                     </div>
                 )}
                 {state?.success && (
-                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm animate-[fadeInUp_300ms_ease-out]">
                         Check your email for a password reset link.
                     </div>
                 )}

@@ -121,7 +121,7 @@ export function EventForm({mode, initialData, onSubmit}: EventFormProps) {
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)} className="max-w-2xl mx-auto space-y-6">
             {submitError && (
-                <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
+                <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 animate-[fadeInUp_300ms_ease-out]">
                     {submitError}
                 </div>
             )}
@@ -258,7 +258,7 @@ export function EventForm({mode, initialData, onSubmit}: EventFormProps) {
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-6 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                    className="px-6 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors active:scale-[0.97] transition-transform duration-[160ms] ease-out"
                 >
                     Cancel
                 </button>

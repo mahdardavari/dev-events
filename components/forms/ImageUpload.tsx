@@ -47,7 +47,7 @@ export function ImageUpload({currentImage, error, onChange, onBlur, name}: Image
             </label>
 
             {displayImage ? (
-                <div className="relative">
+                <div className="relative animate-[fadeInUp_300ms_ease-out]">
                     <Image
                         src={displayImage}
                         alt="Event preview"
@@ -58,14 +58,14 @@ export function ImageUpload({currentImage, error, onChange, onBlur, name}: Image
                     <div className="absolute top-2 right-2 flex gap-2">
                         <label
                             htmlFor={name}
-                            className="cursor-pointer bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full transition-colors"
+                            className="cursor-pointer bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full transition-colors active:scale-90 transition-transform duration-[160ms] ease-out"
                         >
                             <Upload size={16}/>
                         </label>
                         <button
                             type="button"
                             onClick={handleRemove}
-                            className="bg-red-600/80 hover:bg-red-500 text-white p-2 rounded-full transition-colors"
+                            className="bg-red-600/80 hover:bg-red-500 text-white p-2 rounded-full transition-colors active:scale-90 transition-transform duration-[160ms] ease-out"
                         >
                             <X size={16}/>
                         </button>

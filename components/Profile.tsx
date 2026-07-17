@@ -20,7 +20,8 @@ const ProfileContent = async () => {
             <div className="flex items-center gap-2">
                 <p>Welcome, {session.user.name}</p>
                 <form action={signOutAction}>
-                    <button type="submit" aria-label="Sign out">
+                    <button type="submit" aria-label="Sign out"
+                        className="active:scale-[0.9] transition-transform duration-[160ms] ease-out">
                         <LogOut className='cursor-pointer m-2' size={20}/>
                     </button>
                 </form>
