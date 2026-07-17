@@ -104,12 +104,14 @@ export function EventForm({mode, initialData, onSubmit}: EventFormProps) {
 
         if (imageFile) {
             formData.append('image', imageFile);
+        } else if (mode === 'edit' && initialData?.image) {
+            formData.append('currentImage', initialData.image);
         }
 
         const result = await onSubmit(formData);
 
-        if (result.success && result.slug) {
-            router.push(`/events/${result.slug}`);
+        if (result.success) {
+            router.push('/');
             router.refresh();
         } else {
             setSubmitError(result.error || 'Something went wrong');

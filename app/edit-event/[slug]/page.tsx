@@ -104,7 +104,7 @@ const EditEventPage = async ({params}: { params: Promise<{ slug: string }> }) =>
                         agenda: event.agenda,
                         tags: event.tags,
                     }}
-                    onSubmit={(formData) => handleUpdateEvent(slug, formData)}
+                    onSubmit={handleUpdateEvent.bind(null, slug)}
                 />
             </div>
         </main>
