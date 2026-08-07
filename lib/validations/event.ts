@@ -1,8 +1,5 @@
 import {z} from 'zod';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
 export const eventFormSchema = z.object({
     title: z
         .string()
@@ -51,18 +48,6 @@ export const eventFormSchema = z.object({
 });
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;
-
-export const eventFileSchema = z.object({
-    image: z
-        .instanceof(File, {message: 'Image is required'})
-        .refine((file) => file.size <= MAX_FILE_SIZE, `Image must be less than 5MB`)
-        .refine(
-            (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-            'Only .jpg, .jpeg, .png and .webp formats are accepted'
-        ),
-});
-
-export type EventFileValues = z.infer<typeof eventFileSchema>;
 
 export function parseAgendaText(text: string): string[] {
     return text

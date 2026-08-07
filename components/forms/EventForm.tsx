@@ -111,7 +111,7 @@ export function EventForm({mode, initialData, onSubmit}: EventFormProps) {
         const result = await onSubmit(formData);
 
         if (result.success) {
-            router.push('/');
+            router.push(result.slug ? `/events/${result.slug}` : '/');
             router.refresh();
         } else {
             setSubmitError(result.error || 'Something went wrong');
@@ -258,7 +258,7 @@ export function EventForm({mode, initialData, onSubmit}: EventFormProps) {
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-6 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors active:scale-[0.97] transition-transform duration-[160ms] ease-out"
+                    className="px-6 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition duration-[160ms] ease-out active:scale-[0.97]"
                 >
                     Cancel
                 </button>

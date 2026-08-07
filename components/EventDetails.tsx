@@ -5,8 +5,7 @@ import {getSimilarEventsBySlug, getEventBySlug, getBookingCountByEventId} from "
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import EventCard from "@/components/EventCard";
-import {auth} from "@/lib/auth";
-import {headers} from "next/headers";
+import {getSession} from "@/lib/session";
 import {Pencil} from "lucide-react";
 
 const EventDetailItem = ({icon, alt, label}: { icon: string; alt: string; label: string }) => (
@@ -63,15 +62,7 @@ const BookingCount = async ({eventId}: { eventId: string }) => {
     );
 };
 
-const BookingSection = async ({eventId, slug}: { eventId: string; slug: string }) => {
-    let isLoggedIn = false;
-    try {
-        const session = await auth.api.getSession({headers: await headers()});
-        isLoggedIn = !!session?.user;
-    } catch {
-        // Not logged in
-    }
-
+const BookingSection = ({eventId, slug, isLoggedIn}: { eventId: string; slug: string; isLoggedIn: boolean }) => {
     return (
         <aside className="booking">
             <div className="signup-card">
@@ -88,7 +79,7 @@ const BookingSection = async ({eventId, slug}: { eventId: string; slug: string }
                         </p>
                         <Link
                             href="/sign-in"
-                            className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium active:scale-[0.97] transition-transform duration-[160ms] ease-out"
+                            className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-[160ms] ease-out text-sm font-medium active:scale-[0.97]"
                         >
                             Sign In
                         </Link>
@@ -105,23 +96,13 @@ const BookingSection = async ({eventId, slug}: { eventId: string; slug: string }
     );
 };
 
-const OwnerCheck = async ({createdBy, slug}: { createdBy: string; slug: string }) => {
-    let isOwner = false;
-    try {
-        const session = await auth.api.getSession({headers: await headers()});
-        if (session?.user?.id && createdBy === session.user.id) {
-            isOwner = true;
-        }
-    } catch {
-        // Not logged in
-    }
-
+const OwnerCheck = ({slug, isOwner}: { slug: string; isOwner: boolean }) => {
     if (!isOwner) return null;
 
     return (
         <Link
             href={`/edit-event/${slug}`}
-            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors active:scale-[0.97] transition-transform duration-[160ms] ease-out"
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition duration-[160ms] ease-out active:scale-[0.97]"
         >
             <Pencil size={14}/>
             Edit
@@ -130,20 +111,21 @@ const OwnerCheck = async ({createdBy, slug}: { createdBy: string; slug: string }
 };
 
 const EventDetails = async ({slug}: { slug: string }) => {
-    const event = await getEventBySlug(slug);
+    const [event, session] = await Promise.all([getEventBySlug(slug), getSession()]);
 
     if (!event || !event.description) return notFound();
 
     const {description, image, overview, date, time, location, mode, agenda, audience, tags, organizer, _id, createdBy} = event;
+
+    const isLoggedIn = !!session?.user;
+    const isOwner = isLoggedIn && session?.user?.id === createdBy;
 
     return (
         <section id="event">
             <div className="header">
                 <div className="flex items-center gap-4">
                     <h1>Event Description</h1>
-                    <Suspense fallback={null}>
-                        <OwnerCheck createdBy={createdBy} slug={slug}/>
-                    </Suspense>
+                    <OwnerCheck slug={slug} isOwner={isOwner}/>
                 </div>
                 <p>{description}</p>
             </div>
@@ -176,9 +158,7 @@ const EventDetails = async ({slug}: { slug: string }) => {
                     <EventTags tags={tags}/>
                 </div>
 
-                <Suspense fallback={<aside className="booking"><div className="signup-card"><p className="text-sm text-gray-500">Loading...</p></div></aside>}>
-                    <BookingSection eventId={_id} slug={slug}/>
-                </Suspense>
+                <BookingSection eventId={_id} slug={slug} isLoggedIn={isLoggedIn}/>
             </div>
 
             <Suspense fallback={null}>

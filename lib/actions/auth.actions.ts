@@ -9,6 +9,11 @@ interface AuthError {
     message?: string;
 }
 
+function getAuthErrorMessage(e: unknown, fallback: string): string {
+    const err = e as AuthError | null;
+    return err?.body?.message || err?.message || fallback;
+}
+
 export async function signUpEmailAction(
     prevState: { error: string } | null,
     formData: FormData
@@ -20,9 +25,7 @@ export async function signUpEmailAction(
     try {
         await auth.api.signUpEmail({body: {name, email, password}});
     } catch (e: unknown) {
-        const err = e as AuthError;
-        const message = err?.body?.message || err?.message || "Something went wrong. Please try again.";
-        return { error: message };
+        return { error: getAuthErrorMessage(e, "Something went wrong. Please try again.") };
     }
 
     redirect("/");
@@ -40,9 +43,7 @@ export async function signInEmailAction(
             body: {email, password},
         });
     } catch (e: unknown) {
-        const err = e as AuthError;
-        const message = err?.body?.message || err?.message || "Invalid email or password.";
-        return { error: message };
+        return { error: getAuthErrorMessage(e, "Invalid email or password.") };
     }
 
     redirect("/");
@@ -69,9 +70,7 @@ export async function forgotPasswordAction(
             },
         });
     } catch (e: unknown) {
-        const err = e as AuthError;
-        const message = err?.body?.message || err?.message || "Something went wrong. Please try again.";
-        return { error: message, success: false };
+        return { error: getAuthErrorMessage(e, "Something went wrong. Please try again."), success: false };
     }
 
     return { error: "", success: true };
@@ -92,9 +91,7 @@ export async function resetPasswordAction(
             },
         });
     } catch (e: unknown) {
-        const err = e as AuthError;
-        const message = err?.body?.message || err?.message || "Invalid or expired token. Please try again.";
-        return { error: message };
+        return { error: getAuthErrorMessage(e, "Invalid or expired token. Please try again.") };
     }
 
     redirect("/sign-in");

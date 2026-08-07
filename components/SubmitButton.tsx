@@ -7,7 +7,7 @@ import {cn} from "@/lib/utils";
 
 // Define style variants for different looks and sizes
 const buttonVariants = cva(
-    "inline-flex items-center justify-center font-medium transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] transition-transform duration-[160ms] ease-out",
+    "inline-flex items-center justify-center font-medium transition duration-[160ms] ease-out rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97]",
     {
         variants: {
             variant: {

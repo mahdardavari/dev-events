@@ -1,10 +1,9 @@
 "use client";
 
-import {useState, useCallback, useRef, ChangeEvent} from "react";
+import {useCallback, useRef, ChangeEvent} from "react";
 import {useRouter} from "next/navigation";
 
 export default function SearchBar({initialValue = ""}: { initialValue?: string }) {
-    const [value, setValue] = useState(initialValue);
     const router = useRouter();
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const isInitialMount = useRef(true);
@@ -21,7 +20,6 @@ export default function SearchBar({initialValue = ""}: { initialValue?: string }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
-        setValue(newValue);
 
         if (isInitialMount.current) {
             isInitialMount.current = false;

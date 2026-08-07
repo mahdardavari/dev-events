@@ -1,24 +1,30 @@
 "use client"
 
-import React, {useActionState} from 'react'
+import {useActionState} from 'react'
 import {signUpEmailAction} from "@/lib/actions/auth.actions";
 import {SubmitButton} from "@/components/SubmitButton";
+import {AuthCard} from "@/components/AuthCard";
+import {FormAlert} from "@/components/FormAlert";
 import Link from "next/link";
 
 const SignUpEmailPage = () => {
     const [state, formAction] = useActionState(signUpEmailAction, null);
 
     return (
-        <section className="min-h-screen flex items-center justify-center">
-            <form
-                action={formAction}
-                className="p-6 rounded-2xl shadow-lg space-y-4 w-80"
-            >
-                <h1 className="text-2xl font-bold text-center">Sign up with email</h1>
+        <AuthCard
+            title="Sign up with email"
+            footer={
+                <>
+                    Already have an account?{" "}
+                    <Link href="/sign-in" className="text-blue-600 hover:underline">
+                        Sign in
+                    </Link>
+                </>
+            }
+        >
+            <form action={formAction} className="space-y-4">
                 {state?.error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm animate-[fadeInUp_300ms_ease-out]">
-                        {state.error}
-                    </div>
+                    <FormAlert type="error">{state.error}</FormAlert>
                 )}
                 <input
                     type="text"
@@ -48,14 +54,8 @@ const SignUpEmailPage = () => {
                 >
                     Create account
                 </SubmitButton>
-                <p className="text-center text-sm text-gray-600">
-                    Already have an account?{" "}
-                    <Link href="/sign-in" className="text-blue-600 hover:underline">
-                        Sign in
-                    </Link>
-                </p>
             </form>
-        </section>
+        </AuthCard>
     )
 }
 export default SignUpEmailPage

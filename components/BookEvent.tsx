@@ -5,17 +5,19 @@ import {createBooking} from "@/lib/actions/booking.actions";
 
 const BookEvent = ({eventId, slug}: { eventId: string, slug: string; }) => {
     const [email, setEmail] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        setError(null);
 
-        const {success} = await createBooking({eventId, slug, email});
+        const {success, error: message} = await createBooking({eventId, slug, email});
 
         if (success) {
             setSubmitted(true);
         } else {
-            console.error('Booking creation failed')
+            setError(message ?? 'Booking failed. Please try again.');
         }
     }
 
@@ -35,6 +37,12 @@ const BookEvent = ({eventId, slug}: { eventId: string, slug: string; }) => {
                             placeholder="Enter your email address"
                         />
                     </div>
+
+                    {error && (
+                        <p className="text-sm text-red-400" role="alert">
+                            {error}
+                        </p>
+                    )}
 
                     <button type="submit" className="button-submit">Submit</button>
                 </form>

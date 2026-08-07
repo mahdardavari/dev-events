@@ -1,6 +1,5 @@
 import {Suspense} from "react";
-import {auth} from "@/lib/auth";
-import {headers} from "next/headers";
+import {getSession} from "@/lib/session";
 import Link from "next/link";
 import {signOutAction} from "@/lib/actions/auth.actions";
 import {LogOut} from 'lucide-react';
@@ -13,7 +12,7 @@ const ProfileSkeleton = () => (
 );
 
 const ProfileContent = async () => {
-    const session = await auth.api.getSession({headers: await headers()});
+    const session = await getSession();
 
     if (session?.user) {
         return (

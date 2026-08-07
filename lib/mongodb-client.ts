@@ -6,26 +6,17 @@ if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable');
 }
 
-// For Better Auth, we need a native MongoDB client
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+// Better Auth needs a native MongoDB client. The driver connects lazily on the
+// first operation, so constructing the client performs no I/O. This keeps
+// `next build` from opening a database connection during page-data collection
+// (which previously made builds fail whenever MongoDB was unreachable).
+const globalWithMongo = globalThis as typeof globalThis & {
+    _mongoClient?: MongoClient;
+};
 
-if (process.env.NODE_ENV === 'development') {
-    // In development mode, use a global variable so the connection is preserved
-    const globalWithMongo = global as typeof globalThis & {
-        _mongoClientPromise?: Promise<MongoClient>;
-    };
-
-    if (!globalWithMongo._mongoClientPromise) {
-        client = new MongoClient(MONGODB_URI);
-        globalWithMongo._mongoClientPromise = client.connect();
+export function getMongoClient(): MongoClient {
+    if (!globalWithMongo._mongoClient) {
+        globalWithMongo._mongoClient = new MongoClient(MONGODB_URI);
     }
-    clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-    // In production mode, it's best to not use a global variable
-    client = new MongoClient(MONGODB_URI);
-    clientPromise = client.connect();
+    return globalWithMongo._mongoClient;
 }
-
-
-export default clientPromise;

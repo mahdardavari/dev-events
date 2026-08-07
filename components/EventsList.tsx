@@ -1,13 +1,26 @@
 import EventCard from "@/components/EventCard";
 import {getFilteredEvents} from "@/lib/actions/event.actions";
-import {cacheLife, cacheTag} from "next/cache";
+import {IEventLean} from "@/database/event.model";
 
 const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
-    'use cache: private';
-    cacheLife({stale: 60});
-    cacheTag(`events-${searchQuery}`);
+    let events: IEventLean[] = [];
+    let total = 0;
 
-    const {events, total} = await getFilteredEvents(searchQuery);
+    try {
+        const result = await getFilteredEvents(searchQuery);
+        events = result.events;
+        total = result.total;
+    } catch {
+        // e.g. database unreachable — degrade gracefully instead of crashing the page
+        return (
+            <div className="mt-20 space-y-7">
+                <h3>Featured Events</h3>
+                <p className="text-sm text-red-400">
+                    We couldn&apos;t load events right now. Please try again later.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="mt-20 space-y-7">

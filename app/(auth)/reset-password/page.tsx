@@ -1,8 +1,10 @@
 "use client"
 
-import React, {useActionState, Suspense} from 'react'
+import {useActionState, Suspense} from 'react'
 import {resetPasswordAction} from "@/lib/actions/auth.actions";
 import {SubmitButton} from "@/components/SubmitButton";
+import {AuthCard} from "@/components/AuthCard";
+import {FormAlert} from "@/components/FormAlert";
 import Link from "next/link";
 import {useSearchParams} from "next/navigation";
 
@@ -13,31 +15,31 @@ function ResetPasswordForm() {
 
     if (!token) {
         return (
-            <main className="min-h-screen flex items-center justify-center">
-                <div className="p-6 rounded-2xl shadow-lg space-y-4 w-80 text-center">
-                    <h1 className="text-2xl font-bold">Invalid link</h1>
-                    <p className="text-sm text-gray-600">
-                        This password reset link is invalid or missing a token.
-                    </p>
+            <AuthCard title="Invalid link">
+                <p className="text-sm text-gray-600 text-center">
+                    This password reset link is invalid or missing a token.
+                </p>
+                <div className="text-center">
                     <Link href="/forgot-password" className="text-blue-600 hover:underline text-sm">
                         Request a new reset link
                     </Link>
                 </div>
-            </main>
+            </AuthCard>
         );
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center">
-            <form
-                action={formAction}
-                className="p-6 rounded-2xl shadow-lg space-y-4 w-80"
-            >
-                <h1 className="text-2xl font-bold text-center">Reset password</h1>
+        <AuthCard
+            title="Reset password"
+            footer={
+                <Link href="/sign-in" className="text-blue-600 hover:underline">
+                    Back to sign in
+                </Link>
+            }
+        >
+            <form action={formAction} className="space-y-4">
                 {state?.error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm animate-[fadeInUp_300ms_ease-out]">
-                        {state.error}
-                    </div>
+                    <FormAlert type="error">{state.error}</FormAlert>
                 )}
                 <input type="hidden" name="token" value={token} />
                 <input
@@ -51,13 +53,8 @@ function ResetPasswordForm() {
                 <SubmitButton variant="tertiary" size="lg" className="w-full">
                     Reset password
                 </SubmitButton>
-                <p className="text-center text-sm text-gray-600">
-                    <Link href="/sign-in" className="text-blue-600 hover:underline">
-                        Back to sign in
-                    </Link>
-                </p>
             </form>
-        </main>
+        </AuthCard>
     );
 }
 

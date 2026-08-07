@@ -1,10 +1,11 @@
 import {betterAuth} from "better-auth";
 import {mongodbAdapter} from "better-auth/adapters/mongodb";
-import clientPromise from "./mongodb-client";
+import {getMongoClient} from "./mongodb-client";
 import {nextCookies} from "better-auth/next-js";
 import nodemailer from "nodemailer";
 
-const client = await clientPromise;
+// Lazy client: no I/O at import time (the driver connects on the first query).
+const client = getMongoClient();
 const db = client.db();
 
 const transporter = nodemailer.createTransport({
@@ -60,4 +61,3 @@ export const auth = betterAuth({
     },
     plugins: [nextCookies()],
 });
-

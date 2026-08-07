@@ -1,9 +1,10 @@
 import {Metadata} from 'next';
 import {redirect} from 'next/navigation';
-import {auth} from '@/lib/auth';
-import {headers} from 'next/headers';
 import {EventForm} from '@/components/forms/EventForm';
 import {createEvent} from '@/lib/actions/event.actions';
+import {getSession} from '@/lib/session';
+import {uploadEventImage} from '@/lib/cloudinary';
+import {extractEventFormData} from '@/lib/event-form';
 import {Suspense} from 'react';
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 async function handleCreateEvent(formData: FormData) {
     'use server';
 
-    const session = await auth.api.getSession({headers: await headers()});
+    const session = await getSession();
     if (!session?.user) {
         redirect('/sign-in');
     }
@@ -24,34 +25,11 @@ async function handleCreateEvent(formData: FormData) {
         return {success: false, error: 'Image is required'};
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const {v2: cloudinary} = await import('cloudinary');
-    const uploadResult = await new Promise<{secure_url: string}>((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-            {resource_type: 'image', folder: 'DevEvent'},
-            (error, results) => {
-                if (error) return reject(error);
-                resolve(results as {secure_url: string});
-            }
-        ).end(buffer);
-    });
+    const image = await uploadEventImage(file);
 
     const result = await createEvent({
-        title: formData.get('title') as string,
-        description: formData.get('description') as string,
-        overview: formData.get('overview') as string,
-        image: uploadResult.secure_url,
-        venue: formData.get('venue') as string,
-        location: formData.get('location') as string,
-        date: formData.get('date') as string,
-        time: formData.get('time') as string,
-        mode: formData.get('mode') as 'online' | 'offline' | 'hybrid',
-        audience: formData.get('audience') as string,
-        organizer: formData.get('organizer') as string,
-        agenda: JSON.parse(formData.get('agenda') as string),
-        tags: JSON.parse(formData.get('tags') as string),
+        ...extractEventFormData(formData),
+        image,
         createdBy: session.user.id,
     });
 
@@ -63,7 +41,7 @@ async function handleCreateEvent(formData: FormData) {
 }
 
 async function CreateEventContent() {
-    const session = await auth.api.getSession({headers: await headers()});
+    const session = await getSession();
 
     if (!session?.user) {
         redirect('/sign-in');

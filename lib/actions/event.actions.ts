@@ -1,16 +1,33 @@
 'use server';
 
-import Event, { IEventLean } from '@/database/event.model';
+import Event, {IEventLean} from '@/database/event.model';
 import connectDB from "@/lib/mongodb";
+import {escapeRegex} from "@/lib/utils";
 
-export const getEventBySlug = async (slug: string): Promise<IEventLean | null> => {
-    await connectDB();
-    const event = await Event.findOne({ slug })
-        .select('title slug description overview image venue location date time mode audience agenda organizer tags createdBy createdAt updatedAt')
-        .lean();
+// Shape accepted by toLeanEvent: a document or a lean() result (both expose
+// the same fields, with _id being an ObjectId or string).
+type EventLeanSource = {
+    _id: {toString(): string} | string;
+    title: string;
+    slug: string;
+    description: string;
+    overview: string;
+    image: string;
+    venue: string;
+    location: string;
+    date: string;
+    time: string;
+    mode: string;
+    audience: string;
+    agenda: string[];
+    organizer: string;
+    tags: string[];
+    createdBy: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
-    if (!event) return null;
-
+function toLeanEvent(event: EventLeanSource): IEventLean {
     return {
         _id: event._id.toString(),
         title: event.title,
@@ -31,6 +48,17 @@ export const getEventBySlug = async (slug: string): Promise<IEventLean | null> =
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
     };
+}
+
+export const getEventBySlug = async (slug: string): Promise<IEventLean | null> => {
+    await connectDB();
+    const event = await Event.findOne({ slug })
+        .select('title slug description overview image venue location date time mode audience agenda organizer tags createdBy createdAt updatedAt')
+        .lean();
+
+    if (!event) return null;
+
+    return toLeanEvent(event);
 };
 
 export const getSimilarEventsBySlug = async (slug: string): Promise<IEventLean[]> => {
@@ -47,7 +75,7 @@ export const getSimilarEventsBySlug = async (slug: string): Promise<IEventLean[]
         ]);
 
         return similarEvents.map((e: Record<string, unknown>) => ({
-            _id: (e._id as {_toString(): string})._toString(),
+            _id: (e._id as {toString(): string}).toString(),
             title: e.title as string,
             slug: e.slug as string,
             description: '',
@@ -112,7 +140,7 @@ export const getFilteredEvents = async (
         };
     }
 
-    const escapedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedQuery = escapeRegex(query.trim());
     const regex = new RegExp(escapedQuery, 'i');
 
     const [events, total] = await Promise.all([
@@ -172,28 +200,6 @@ export interface EventActionResult {
     error?: string;
 }
 
-function toLeanEvent(event: InstanceType<typeof Event>): IEventLean {
-    return {
-        _id: event._id.toString(),
-        title: event.title,
-        slug: event.slug,
-        description: event.description,
-        overview: event.overview,
-        image: event.image,
-        venue: event.venue,
-        location: event.location,
-        date: event.date,
-        time: event.time,
-        mode: event.mode,
-        audience: event.audience,
-        agenda: event.agenda,
-        organizer: event.organizer,
-        tags: event.tags,
-        createdBy: event.createdBy,
-        createdAt: event.createdAt,
-        updatedAt: event.updatedAt,
-    };
-}
 
 export const createEvent = async (input: CreateEventInput): Promise<EventActionResult> => {
     try {
@@ -248,26 +254,7 @@ export const getEventForEdit = async (slug: string, userId: string): Promise<Eve
 
         return {
             success: true,
-            event: {
-                _id: event._id.toString(),
-                title: event.title,
-                slug: event.slug,
-                description: event.description,
-                overview: event.overview,
-                image: event.image,
-                venue: event.venue,
-                location: event.location,
-                date: event.date,
-                time: event.time,
-                mode: event.mode,
-                audience: event.audience,
-                agenda: event.agenda,
-                organizer: event.organizer,
-                tags: event.tags,
-                createdBy: event.createdBy,
-                createdAt: event.createdAt,
-                updatedAt: event.updatedAt,
-            },
+            event: toLeanEvent(event),
         };
     } catch (e) {
         const message = e instanceof Error ? e.message : 'Failed to fetch event';

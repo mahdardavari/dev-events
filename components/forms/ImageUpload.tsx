@@ -58,14 +58,14 @@ export function ImageUpload({currentImage, error, onChange, onBlur, name}: Image
                     <div className="absolute top-2 right-2 flex gap-2">
                         <label
                             htmlFor={name}
-                            className="cursor-pointer bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full transition-colors active:scale-90 transition-transform duration-[160ms] ease-out"
+                            className="cursor-pointer bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full transition duration-[160ms] ease-out active:scale-90"
                         >
                             <Upload size={16}/>
                         </label>
                         <button
                             type="button"
                             onClick={handleRemove}
-                            className="bg-red-600/80 hover:bg-red-500 text-white p-2 rounded-full transition-colors active:scale-90 transition-transform duration-[160ms] ease-out"
+                            className="bg-red-600/80 hover:bg-red-500 text-white p-2 rounded-full transition duration-[160ms] ease-out active:scale-90"
                         >
                             <X size={16}/>
                         </button>
