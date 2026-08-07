@@ -1,7 +1,7 @@
 import {Metadata} from 'next';
 import {redirect} from 'next/navigation';
 import {EventForm} from '@/components/forms/EventForm';
-import {createEvent} from '@/lib/actions/event.actions';
+import {createEvent} from '@/lib/services/event.service';
 import {getSession} from '@/lib/session';
 import {uploadEventImage} from '@/lib/cloudinary';
 import {extractEventFormData} from '@/lib/event-form';
@@ -33,11 +33,11 @@ async function handleCreateEvent(formData: FormData) {
         createdBy: session.user.id,
     });
 
-    if (result.success && result.event) {
-        return {success: true, slug: result.event.slug};
+    if (!result.success) {
+        return {success: false, error: result.error};
     }
 
-    return {success: false, error: result.error};
+    return {success: true, slug: result.event.slug};
 }
 
 async function CreateEventContent() {

@@ -1,6 +1,6 @@
-import Profile from "@/components/Profile";
+import Profile from "@/components/auth/Profile";
 import {Suspense} from "react";
-import {SearchSection} from "@/components/SearchSection";
+import {SearchSection} from "@/components/events/SearchSection";
 
 export default function Home({searchParams}: {
     searchParams: Promise<{ q?: string }>;

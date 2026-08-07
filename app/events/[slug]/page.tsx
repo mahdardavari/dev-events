@@ -1,5 +1,5 @@
 import {Suspense} from "react";
-import EventDetails from "@/components/EventDetails";
+import EventDetails from "@/components/events/EventDetails";
 
 const EventDetailsPage = async ({params}: { params: Promise<{ slug: string }> }) => {
     const {slug} = await params;

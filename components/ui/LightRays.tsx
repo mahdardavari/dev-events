@@ -2,6 +2,25 @@
 import {useRef, useEffect, useState} from 'react';
 import {Renderer, Program, Triangle, Mesh} from 'ogl';
 
+/**
+ * LightRays — full-screen WebGL light-ray effect built on the OGL library.
+ *
+ * WHAT MAKES THIS TRICKY (read before touching it):
+ * - The entire effect is computed per-pixel on the GPU by ONE GLSL fragment
+ *   shader (below). There is no DOM/CSS animation — props are pushed into
+ *   shader `uniforms` and the shader does the rest.
+ * - The shader is GLSL ES 1.00 (WebGL1): use `varying`/`gl_FragColor`, not
+ *   `in`/`out` or `texture()`; changing the GLSL version breaks the effect.
+ * - Rendering only runs while the element is on screen (an IntersectionObserver
+ *   gates the requestAnimationFrame loop) and is fully torn down on unmount
+ *   (context released, listeners removed) to avoid leaking GPU resources.
+ * - There are TWO effects that write uniforms: the main setup effect (full
+ *   rebuild) and a separate "sync" effect that hot-updates uniforms in place
+ *   when a prop changes, so we don't re-initialize WebGL on every prop tweak.
+ * - The canvas is re-created on every visibility toggle; always null out the
+ *   refs after cleanup or the render loop will keep resurrecting stale state.
+ */
+
 export type RaysOrigin =
     | 'top-center'
     | "top-center-offset"
@@ -29,13 +48,25 @@ interface LightRaysProps {
     className?: string;
 }
 
+// Default ray color used when the consumer doesn't pass `raysColor`.
 const DEFAULT_COLOR = '#ffffff';
+
+/**
+ * Converts a #rrggbb hex string into a normalized [0..1] RGB tuple for GLSL.
+ * Falls back to white when the input isn't a 6-digit hex color.
+ */
 
 const hexToRgb = (hex: string): [number, number, number] => {
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : [1, 1, 1];
 };
 
+/**
+ * Maps a named origin ('top-center', 'bottom-right', ...) to a screen-space
+ * anchor point and an outward direction vector. Anchors sit just OUTSIDE the
+ * viewport (hence the `outside` offset) so the rays appear to emanate from
+ * behind the edge of the screen rather than from inside it.
+ */
 const getAnchorAndDir = (
     origin: RaysOrigin,
     w: number,
@@ -170,6 +201,10 @@ void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }`;
 
+            // ── GLSL fragment shader (WebGL1 / GLSL ES 1.00) ─────────────────
+            // The whole light-ray look lives here. `rayStrength` is the core
+            // function: it samples one ray by angle from the anchor point and
+            // combines falloff, spread, pulsing and noise into a brightness.
             const frag = `precision highp float;
 
 uniform float iTime;

@@ -8,6 +8,9 @@ import nodemailer from "nodemailer";
 const client = getMongoClient();
 const db = client.db();
 
+// Gmail SMTP transport used to deliver the password-reset email.
+// Requires GMAIL_USER + GMAIL_APP_PASSWORD (an app password, NOT the
+// account password) in the environment.
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

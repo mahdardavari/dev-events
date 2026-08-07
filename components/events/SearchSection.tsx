@@ -1,6 +1,6 @@
-import SearchBar from "@/components/SearchBar";
+import SearchBar from "./SearchBar";
 import {Suspense} from "react";
-import EventsList from "@/components/EventsList";
+import EventsList from "./EventsList";
 
 export async function SearchSection({searchParams}: {
     searchParams: Promise<{ q?: string }>;

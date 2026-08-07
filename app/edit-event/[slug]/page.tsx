@@ -1,7 +1,7 @@
 import {Metadata} from 'next';
 import {notFound, redirect} from 'next/navigation';
 import {EventForm} from '@/components/forms/EventForm';
-import {getEventForEdit, updateEvent} from '@/lib/actions/event.actions';
+import {getEventForEdit, updateEvent} from '@/lib/services/event.service';
 import {getSession} from '@/lib/session';
 import {uploadEventImage} from '@/lib/cloudinary';
 import {extractEventFormData} from '@/lib/event-form';
@@ -31,11 +31,11 @@ async function handleUpdateEvent(slug: string, formData: FormData) {
 
     const result = await updateEvent(slug, session.user.id, input);
 
-    if (result.success && result.event) {
-        return {success: true, slug: result.event.slug};
+    if (!result.success) {
+        return {success: false, error: result.error};
     }
 
-    return {success: false, error: result.error};
+    return {success: true, slug: result.event.slug};
 }
 
 async function EditEventContent({params}: { params: Promise<{ slug: string }> }) {

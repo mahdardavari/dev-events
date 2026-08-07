@@ -1,15 +1,27 @@
 import {NextRequest, NextResponse} from "next/server";
-import connectDB from "@/lib/mongodb";
-import Event from "@/database/event.model";
-import {getAllEvents} from "@/lib/actions/event.actions";
+import {getAllEvents, createEvent} from "@/lib/services/event.service";
 import {uploadEventImage} from "@/lib/cloudinary";
 import {extractEventFormData} from "@/lib/event-form";
 
+/**
+ * REST API for events (POST create / GET list) — for external API consumers.
+ * The app's own UI never calls this; it goes through the server actions in
+ * `lib/actions/event.actions.ts`. Both entry points share the write logic via
+ * `lib/services/event.service.ts`.
+ *
+ * ⚠️ SECURITY: `createdBy` is taken straight from client-supplied form data,
+ * so any caller can attribute an event to another user. There is no session
+ * check here, unlike the server-action path (see `app/create-event/page.tsx`).
+ * Fix with real auth before exposing this publicly.
+ */
+
+// Fields validated manually here because the API path doesn't use the zod
+// schema. Consider switching to `eventFormSchema.safeParse(...)` to avoid
+// drift between client validation (zod) and this hand-rolled check.
 const REQUIRED_FIELDS = ['title', 'description', 'overview', 'venue', 'location', 'date', 'time', 'mode', 'audience', 'organizer'] as const;
 
 export async function POST(req: NextRequest) {
     try {
-        await connectDB();
         const formData = await req.formData();
 
         const file = formData.get('image');
@@ -41,13 +53,18 @@ export async function POST(req: NextRequest) {
 
         const imageUrl = await uploadEventImage(file);
 
-        const createdEvent = await Event.create({
+        const result = await createEvent({
             ...eventData,
             image: imageUrl,
             createdBy: formData.get('createdBy') as string,
         });
 
-        return NextResponse.json({message: 'Event created successfully', event: createdEvent}, {status: 201});
+        if (result.success) {
+            return NextResponse.json({message: 'Event created successfully', event: result.event}, {status: 201});
+        }
+
+        const status = result.code === 'DUPLICATE' ? 409 : 500;
+        return NextResponse.json({message: 'Event creation failed', error: result.error}, {status});
     } catch (e) {
         console.error('Event creation error:', e);
         return NextResponse.json({

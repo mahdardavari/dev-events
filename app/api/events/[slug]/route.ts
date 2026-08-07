@@ -1,11 +1,25 @@
 import {NextRequest, NextResponse} from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Event, {IEvent} from '@/database/event.model';
+import Event, {IEvent, IEventLean} from '@/lib/models/event.model';
+import {updateEvent} from '@/lib/services/event.service';
 import {uploadEventImage} from '@/lib/cloudinary';
 import {extractEventFormData} from '@/lib/event-form';
 
+/**
+ * REST API for a single event (GET / PUT) — external-consumer path.
+ * GET queries the model directly; PUT delegates ownership + save to the
+ * shared `updateEvent` in `lib/services/event.service.ts` (same code path as
+ * the UI's server actions).
+ *
+ * ⚠️ SECURITY: the PUT handler authorizes via the client-supplied
+ * `x-user-id` header, which anyone can spoof. Replace it with a real session
+ * check (auth.api.getSession) before exposing this publicly.
+ */
+
+// GET returns the full lean document (IEvent); PUT returns the lean UI shape
+// (IEventLean) via the shared service — both are valid `event` payloads.
 type ApiResponse =
-    | { message: string; event: IEvent }
+    | { message: string; event: IEvent | IEventLean }
     | { message: string; error: string };
 
 export async function GET(
@@ -77,6 +91,10 @@ export async function PUT(
             );
         }
 
+        // Reject non-owners BEFORE parsing the body/uploading: the old code
+        // ordered this check first, and it keeps an unauthorized caller from
+        // triggering a paid Cloudinary upload. The service re-checks ownership
+        // too (defense in depth).
         if (event.createdBy !== userId) {
             return NextResponse.json(
                 {message: 'Forbidden', error: 'You can only edit your own events'},
@@ -84,6 +102,9 @@ export async function PUT(
             );
         }
 
+        // Ownership + save are delegated to the shared service. We only fetch
+        // the existing doc here to fall back to current values for fields the
+        // client didn't send (partial updates).
         const formData = await req.formData();
         const data = extractEventFormData(formData);
         const imageFile = formData.get('image');
@@ -91,7 +112,7 @@ export async function PUT(
             ? await uploadEventImage(imageFile)
             : event.image;
 
-        Object.assign(event, {
+        const result = await updateEvent(slug, userId, {
             title: data.title ?? event.title,
             description: data.description ?? event.description,
             overview: data.overview ?? event.overview,
@@ -107,9 +128,15 @@ export async function PUT(
             image,
         });
 
-        await event.save();
+        if (!result.success) {
+            const status = result.code === 'NOT_FOUND' ? 404 : result.code === 'FORBIDDEN' ? 403 : 500;
+            return NextResponse.json(
+                {message: 'Failed to update event', error: result.error},
+                {status}
+            );
+        }
 
-        return NextResponse.json({message: 'Event updated successfully', event}, {status: 200});
+        return NextResponse.json({message: 'Event updated successfully', event: result.event}, {status: 200});
     } catch (error) {
         console.error('Error updating event:', error);
         return NextResponse.json(

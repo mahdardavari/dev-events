@@ -1,8 +1,22 @@
-'use server';
-
-import Event, {IEventLean} from '@/database/event.model';
+import Event, {IEventLean} from "@/lib/models/event.model";
 import connectDB from "@/lib/mongodb";
 import {escapeRegex} from "@/lib/utils";
+
+/**
+ * Event service — the single source of truth for event reads and writes.
+ *
+ * Every entry point calls these functions directly:
+ * - Pages & server components (e.g. `app/create-event`, `app/events/[slug]`)
+ * - REST API routes (`app/api/events/**`)
+ *
+ * This is a plain server-only module (no `'use server'` directive) because
+ * nothing here is invoked directly from a client component — pages wrap these
+ * calls in their own server actions when needed.
+ *
+ * Queries return lean documents; write functions return a tagged
+ * `EventWriteResult` so each layer can map success/error to its own
+ * transport (inline form state vs HTTP status code).
+ */
 
 // Shape accepted by toLeanEvent: a document or a lean() result (both expose
 // the same fields, with _id being an ObjectId or string).
@@ -27,6 +41,11 @@ type EventLeanSource = {
     updatedAt: Date;
 };
 
+/**
+ * Converts a Mongoose document / lean() result into the plain `IEventLean`
+ * shape consumed by components. `_id` is stringified because lean() returns
+ * an ObjectId, which is not serializable when passed to a client component.
+ */
 function toLeanEvent(event: EventLeanSource): IEventLean {
     return {
         _id: event._id.toString(),
@@ -68,12 +87,17 @@ export const getSimilarEventsBySlug = async (slug: string): Promise<IEventLean[]
         const event = await Event.findOne({ slug }).select('tags').lean();
         if (!event) return [];
 
+        // Aggregation: pick up to 4 random events (via $sample) that share at
+        // least one tag with the current event, excluding the event itself.
         const similarEvents = await Event.aggregate([
             {$match: {_id: {$ne: event._id}, tags: {$in: event.tags}}},
             {$sample: {size: 4}},
             {$project: {title: 1, slug: 1, image: 1, location: 1, date: 1, time: 1, createdBy: 1, createdAt: 1, updatedAt: 1}},
         ]);
 
+        // The $project stage only selects a few fields, so every other field is
+        // padded with an empty placeholder to satisfy the full IEventLean type.
+        // Consumers only read title/slug/image/location/date/time here.
         return similarEvents.map((e: Record<string, unknown>) => ({
             _id: (e._id as {toString(): string}).toString(),
             title: e.title as string,
@@ -101,7 +125,9 @@ export const getSimilarEventsBySlug = async (slug: string): Promise<IEventLean[]
 
 export const getBookingCountByEventId = async (eventId: string): Promise<number> => {
     await connectDB();
-    const { default: Booking } = await import('@/database/booking.model');
+    // Lazy-imported so read-heavy event queries don't pull the Booking model
+    // into the module graph unless a booking count is actually needed.
+    const { default: Booking } = await import('@/lib/models/booking.model');
     return Booking.countDocuments({ eventId });
 };
 
@@ -114,7 +140,7 @@ export const getAllEvents = async () => {
     }
 };
 
-interface PaginatedEvents {
+export interface PaginatedEvents {
     events: IEventLean[];
     total: number;
     hasMore: boolean;
@@ -194,19 +220,29 @@ export interface UpdateEventInput extends Omit<CreateEventInput, 'createdBy'> {
     slug: string;
 }
 
-export interface EventActionResult {
-    success: boolean;
-    event?: IEventLean;
-    error?: string;
+/**
+ * Result of a write (create / update). `code` lets callers map failures to a
+ * sensible transport response (e.g. HTTP 404/403/409 vs an inline form error).
+ */
+export type EventWriteResult =
+    | { success: true; event: IEventLean }
+    | { success: false; error: string; code?: 'NOT_FOUND' | 'FORBIDDEN' | 'DUPLICATE' | 'UNKNOWN' };
+
+function isDuplicateKeyError(e: unknown): boolean {
+    return typeof e === 'object' && e !== null && (e as { code?: number }).code === 11000;
 }
 
-
-export const createEvent = async (input: CreateEventInput): Promise<EventActionResult> => {
+export const createEvent = async (input: CreateEventInput): Promise<EventWriteResult> => {
     try {
         await connectDB();
         const event = await Event.create(input);
         return {success: true, event: toLeanEvent(event)};
     } catch (e) {
+        // The slug has a unique index; a duplicate title surfaces as a Mongo
+        // E11000 error. Map it to a friendly message + 409 instead of a raw 500.
+        if (isDuplicateKeyError(e)) {
+            return {success: false, code: 'DUPLICATE', error: 'An event with this title already exists'};
+        }
         const message = e instanceof Error ? e.message : 'Failed to create event';
         return {success: false, error: message};
     }
@@ -216,17 +252,17 @@ export const updateEvent = async (
     slug: string,
     userId: string,
     input: Omit<UpdateEventInput, 'slug'>
-): Promise<EventActionResult> => {
+): Promise<EventWriteResult> => {
     try {
         await connectDB();
         const event = await Event.findOne({slug});
 
         if (!event) {
-            return {success: false, error: 'Event not found'};
+            return {success: false, code: 'NOT_FOUND', error: 'Event not found'};
         }
 
         if (event.createdBy !== userId) {
-            return {success: false, error: 'You are not authorized to edit this event'};
+            return {success: false, code: 'FORBIDDEN', error: 'You are not authorized to edit this event'};
         }
 
         Object.assign(event, input);
@@ -234,22 +270,27 @@ export const updateEvent = async (
 
         return {success: true, event: toLeanEvent(event)};
     } catch (e) {
+        // Same duplicate-slug handling as createEvent (renaming an event onto
+        // an existing title hits the unique index → Mongo E11000).
+        if (isDuplicateKeyError(e)) {
+            return {success: false, code: 'DUPLICATE', error: 'An event with this title already exists'};
+        }
         const message = e instanceof Error ? e.message : 'Failed to update event';
         return {success: false, error: message};
     }
 };
 
-export const getEventForEdit = async (slug: string, userId: string): Promise<EventActionResult> => {
+export const getEventForEdit = async (slug: string, userId: string): Promise<EventWriteResult> => {
     try {
         await connectDB();
         const event = await Event.findOne({slug}).lean();
 
         if (!event) {
-            return {success: false, error: 'Event not found'};
+            return {success: false, code: 'NOT_FOUND', error: 'Event not found'};
         }
 
         if (event.createdBy !== userId) {
-            return {success: false, error: 'You are not authorized to edit this event'};
+            return {success: false, code: 'FORBIDDEN', error: 'You are not authorized to edit this event'};
         }
 
         return {

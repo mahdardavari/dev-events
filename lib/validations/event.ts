@@ -1,5 +1,14 @@
 import {z} from 'zod';
 
+/**
+ * Client-side validation schema for the event form (react-hook-form uses it
+ * via zodResolver). `agenda` and `tags` are validated as plain text and
+ * converted to arrays with `parseAgendaText` / `parseTagsText`.
+ *
+ * ⚠️ This schema is currently only enforced on the client. The server actions
+ * and API routes rely on the Mongoose schema + manual checks instead, so the
+ * rules can drift. Server-side enforcement of this schema is a TODO.
+ */
 export const eventFormSchema = z.object({
     title: z
         .string()

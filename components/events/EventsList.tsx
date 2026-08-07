@@ -1,6 +1,6 @@
-import EventCard from "@/components/EventCard";
-import {getFilteredEvents} from "@/lib/actions/event.actions";
-import {IEventLean} from "@/database/event.model";
+import EventCard from "./EventCard";
+import {getFilteredEvents} from "@/lib/services/event.service";
+import {IEventLean} from "@/lib/models/event.model";
 
 const EventsList = async ({searchQuery = ""}: { searchQuery?: string }) => {
     let events: IEventLean[] = [];

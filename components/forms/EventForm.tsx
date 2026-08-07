@@ -1,5 +1,23 @@
 'use client';
 
+/**
+ * EventForm — shared by the Create and Edit pages.
+ *
+ * TWO LAYERS OF VALIDATION (by design):
+ * 1. Client: react-hook-form + zod (`eventFormSchema`) for instant feedback.
+ * 2. Server: the `onSubmit` action runs the create/update flow — currently
+ *    enforced by the Mongoose schema + manual checks, NOT the zod schema
+ *    (see `lib/validations/event.ts`). Never trust the client layer alone.
+ *
+ * NOTE ON `agenda` / `tags`: react-hook-form can't bind array fields to a
+ * plain <textarea>, so the form edits them as plain text (`agendaText` /
+ * `tagsText`) and serializes the parsed arrays as JSON *strings* into the
+ * FormData. `lib/event-form.ts` parses them back on the server — keep the
+ * two sides in sync if you change the encoding.
+ *
+ * IMAGE UPLOAD: the selected File is kept in React state and appended to the
+ * FormData at submit time; it is never sent as part of the form fields.
+ */
 import {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -14,7 +32,7 @@ import {
 } from '@/lib/validations/event';
 import {InputField, TextareaField, SelectField} from '@/components/forms/FormField';
 import {ImageUpload} from '@/components/forms/ImageUpload';
-import {SubmitButton} from '@/components/SubmitButton';
+import {SubmitButton} from '@/components/ui/SubmitButton';
 
 interface EventFormProps {
     mode: 'create' | 'edit';

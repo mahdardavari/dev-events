@@ -2,9 +2,9 @@
 
 import {useActionState, Suspense} from 'react'
 import {resetPasswordAction} from "@/lib/actions/auth.actions";
-import {SubmitButton} from "@/components/SubmitButton";
-import {AuthCard} from "@/components/AuthCard";
-import {FormAlert} from "@/components/FormAlert";
+import {SubmitButton} from "@/components/ui/SubmitButton";
+import {AuthCard} from "@/components/ui/AuthCard";
+import {FormAlert} from "@/components/ui/FormAlert";
 import Link from "next/link";
 import {useSearchParams} from "next/navigation";
 

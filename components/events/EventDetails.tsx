@@ -1,13 +1,24 @@
 import {Suspense} from "react";
 import {notFound} from "next/navigation";
 import Link from "next/link";
-import {getSimilarEventsBySlug, getEventBySlug, getBookingCountByEventId} from "@/lib/actions/event.actions";
+import {getSimilarEventsBySlug, getEventBySlug, getBookingCountByEventId} from "@/lib/services/event.service";
 import Image from "next/image";
-import BookEvent from "@/components/BookEvent";
-import EventCard from "@/components/EventCard";
+import BookEvent from "./BookEvent";
+import EventCard from "./EventCard";
 import {getSession} from "@/lib/session";
 import {Pencil} from "lucide-react";
 
+/**
+ * EventDetails — the full event page body.
+ *
+ * Rendering strategy: it's a server component that fetches the event and the
+ * auth session in parallel (`Promise.all`), while the slow, optional pieces
+ * (booking count, similar events) are wrapped in <Suspense> so they stream in
+ * independently instead of blocking the initial paint.
+ *
+ * `createdBy` on the event is the auth user id; ownership (which shows the
+ * “Edit” button) is a simple id match against the session.
+ */
 const EventDetailItem = ({icon, alt, label}: { icon: string; alt: string; label: string }) => (
     <div className="flex-row-gap-2 items-center">
         <Image src={icon} alt={alt} width={17} height={17} loading="lazy"/>
